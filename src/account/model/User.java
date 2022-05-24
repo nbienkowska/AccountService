@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name="users")
 public class User implements UserDetails {
 
      @Id
@@ -31,7 +32,7 @@ public class User implements UserDetails {
      @NotEmpty
      String lastname;
 
-     @Getter
+    // @Getter
      @Setter
      @NotEmpty
      String email;
@@ -41,6 +42,11 @@ public class User implements UserDetails {
      @NotEmpty
      private String password;
 
+     @Getter
+     @Setter
+     @NotEmpty
+     String username;
+
      private boolean accountNonExpired;
 
      private boolean accountNonLocked;
@@ -49,7 +55,7 @@ public class User implements UserDetails {
 
      private boolean enabled;
 
-     @Enumerated(EnumType.STRING)
+     //@Enumerated(EnumType.STRING)
      @ElementCollection(fetch = FetchType.EAGER)
      private List<Role> roles;
 
@@ -59,6 +65,7 @@ public class User implements UserDetails {
           this.name = name;
           this.lastname = lastname;
           this.email = email;
+          this.username = email;
           this.password = password;
           this.accountNonExpired = true;
           this.accountNonLocked = true;
@@ -73,6 +80,8 @@ public class User implements UserDetails {
      public void setId(Long id) {
           this.id = id;
      }
+
+     public String getEmail() { return email;}
 
      @Override
      public boolean isAccountNonExpired() {
@@ -104,11 +113,6 @@ public class User implements UserDetails {
           List<GrantedAuthority> authorities = new ArrayList<>();
           roles.forEach(role -> authorities.add(new SimpleGrantedAuthority(role.toString())));
           return authorities;
-     }
-
-     @Override
-     public String getUsername() {
-          return null;
      }
 
 }

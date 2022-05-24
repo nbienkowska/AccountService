@@ -1,4 +1,4 @@
-package account.request;
+package account.payload;
 
 public class SingupRequest {
 }

@@ -28,13 +28,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     RestAuthenticationEntryPoint restAuthenticationEntryPoint;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public PasswordEncoder getPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authenticationProvider());
+        auth.userDetailsService(userDetailsService)
+                .passwordEncoder(getPasswordEncoder());
     }
 
     @Override
@@ -42,21 +43,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.httpBasic()
                 .authenticationEntryPoint(restAuthenticationEntryPoint) // Handle auth error
                 .and()
-                .csrf().disable().headers().frameOptions().disable() // for Postman, the H2 console
-                .and()
                 .authorizeRequests() // manage access
-                .antMatchers(HttpMethod.POST, "/api/signup").permitAll()
-                // other matchers
+                .mvcMatchers("/api/empl/payment").authenticated()
+                .anyRequest().permitAll()
                 .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS); // no session
+                .csrf().disable(); // disabling CSRF will allow sending POST request using Postman
+
     }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setPasswordEncoder(passwordEncoder);
-        provider.setUserDetailsService(userDetailsService);
-        return provider;
-    }
 }

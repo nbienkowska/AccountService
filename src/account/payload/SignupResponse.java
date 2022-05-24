@@ -1,4 +1,4 @@
-package account.response;
+package account.payload;
 
 public class SignupResponse {
 }
