@@ -1,16 +1,16 @@
 package account.model;
 
-import lombok.AccessLevel;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 
 import javax.management.relation.Role;
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,33 +18,36 @@ import java.util.List;
 @Table(name="users")
 public class User implements UserDetails {
 
+     @Getter
+     @Setter
      @Id
      @GeneratedValue(strategy = GenerationType.AUTO)
      private Long id;
 
      @Getter
      @Setter
-     @NotEmpty
+     @NotBlank
      String name;
 
      @Getter
      @Setter
-     @NotEmpty
+     @NotBlank
      String lastname;
 
-    // @Getter
+     @Getter
      @Setter
-     @NotEmpty
+     @Email
+     @NotBlank
      String email;
 
      @Getter
      @Setter
-     @NotEmpty
+     @NotBlank
+     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
      private String password;
 
      @Getter
      @Setter
-     @NotEmpty
      String username;
 
      private boolean accountNonExpired;
@@ -55,11 +58,10 @@ public class User implements UserDetails {
 
      private boolean enabled;
 
-     //@Enumerated(EnumType.STRING)
      @ElementCollection(fetch = FetchType.EAGER)
      private List<Role> roles;
 
-     public User() {};
+     public User() {}
 
      public User(String name, String lastname, String email, String password) {
           this.name = name;
@@ -72,16 +74,6 @@ public class User implements UserDetails {
           this.credentialsNonExpired = true;
           this.enabled = true;
      }
-
-     public Long getId() {
-          return id;
-     }
-
-     public void setId(Long id) {
-          this.id = id;
-     }
-
-     public String getEmail() { return email;}
 
      @Override
      public boolean isAccountNonExpired() {

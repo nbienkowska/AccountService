@@ -5,19 +5,15 @@ import account.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.sql.Timestamp;
-import java.util.Date;
+import javax.validation.Valid;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 @RestController
@@ -30,54 +26,29 @@ public class RegistrationController {
     PasswordEncoder passwordEncoder;
 
     @PostMapping("/api/auth/signup")
-    public ResponseEntity<?> createUser(@RequestBody User userRequest) {
+    public ResponseEntity<User> createUser(@Valid @RequestBody User userRequest) {
         Map<String, Object> responseMap = new HashMap<>();
-        User newUser = new User(userRequest.getName(), userRequest.getLastname(),
-                                userRequest.getEmail().toLowerCase(), userRequest.getPassword());
-        String name = userRequest.getName();
-        String lastname = userRequest.getLastname();
         String email = userRequest.getEmail().toLowerCase();
-        String password = userRequest.getPassword();
+        User newUser = new User(userRequest.getName(), userRequest.getLastname(),
+                                email, userRequest.getPassword());
 
-        if (email == null || !email.endsWith("@acme.com") || "".equals(name) || name == null
-                || "".equals(lastname) || lastname == null || "".equals(password) || password == null) {
-            Date date = new Date();
-            Timestamp timestamp = new Timestamp(date.getTime());
-            responseMap.put("timestamp", timestamp.toString());
-            responseMap.put("status", 400);
-            responseMap.put("error", "Bad Request");
-            responseMap.put("path", "/api/auth/signup");
-            return new ResponseEntity(responseMap, HttpStatus.BAD_REQUEST);
+        if (!email.endsWith("@acme.com")) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-        UserDetails userDetails;
-        boolean success = true;
+
         try {
-            userDetails = userService.loadUserByUsername(email);
+            userService.loadUserByUsername(email);
         } catch (UsernameNotFoundException u) {
-            success = false;
             userService.save(newUser);
+            responseMap.put("id", newUser.getId());
+            responseMap.put("name", newUser.getName());
+            responseMap.put("lastname", newUser.getLastname());
+            responseMap.put("email", newUser.getEmail());
+            return new ResponseEntity(responseMap, HttpStatus.OK);
         }
 
-        if (success) {
-            Date date = new Date();
-            Timestamp timestamp = new Timestamp(date.getTime());
-            responseMap.put("timestamp", timestamp.toString());
-            responseMap.put("status", 400);
-            responseMap.put("error", "Bad Request");
-            responseMap.put("message", "User exist!");
-            responseMap.put("path", "/api/auth/signup");
-            return new ResponseEntity(responseMap, HttpStatus.BAD_REQUEST);
-        }
-
-        responseMap.put("id", newUser.getId());
-        responseMap.put("name", userRequest.getName());
-        responseMap.put("lastname", userRequest.getLastname());
-        responseMap.put("email", userRequest.getEmail().toLowerCase());
-
-
-        return new ResponseEntity(responseMap, HttpStatus.OK);
-
-}
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User exist!");
+    }
 }
