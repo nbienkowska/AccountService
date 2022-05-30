@@ -1,5 +1,6 @@
 package account.model;
 
+import account.validation.BreachedPasswordValidation;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +12,7 @@ import javax.management.relation.Role;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +28,7 @@ public class User implements UserDetails {
 
      @Getter
      @Setter
-     @NotBlank
+     @NotBlank()
      String name;
 
      @Getter
@@ -43,7 +45,8 @@ public class User implements UserDetails {
      @Getter
      @Setter
      @NotBlank
-     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+     @Size(min=12, message = "Password length must be 12 chars minimum!")
+     @BreachedPasswordValidation()
      private String password;
 
      @Getter

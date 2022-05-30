@@ -41,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticationEntryPoint(restAuthenticationEntryPoint)
                 .and()
                 .authorizeRequests() // manage access
-                .mvcMatchers("/api/empl/payment").authenticated()
+                .mvcMatchers("/api/empl/payment", "/api/auth/changepass").authenticated()
                 .anyRequest().permitAll()
                 .and()
                 .csrf().disable();
